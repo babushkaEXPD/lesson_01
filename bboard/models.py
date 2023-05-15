@@ -1,0 +1,143 @@
+from django.contrib.auth.models import User
+from django.db import models
+
+
+class Human(models.Model):
+    name = models.CharField(
+        max_length=50,
+        verbose_name="Имя",
+    )
+
+
+class Child(models.Model):
+    name = models.CharField(
+        max_length=50,
+        verbose_name="Имя",
+    )
+
+    age = models.PositiveIntegerField(
+        max_length=2,
+        null=False,
+        blank=False,
+    )
+
+
+class IceCream(models.Model):
+    name = models.CharField(
+        max_length=30,
+        null=False,
+        blank=False,
+    )
+
+    taste = models.CharField(
+        max_length=30,
+        null=False,
+        blank=False,
+    )
+
+
+class IceMarket(models.Model):
+    name = models.CharField(
+        max_length=50,
+        verbose_name='Название'
+    )
+
+
+class AdvUser(models.Model):
+    is_activated = models.BooleanField(
+        default=True,
+    )
+
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE
+    )
+
+
+class Spare(models.Model):
+    name = models.CharField(max_length=30)
+
+
+class Machine(models.Model):
+    name = models.CharField(max_length=30)
+    spares = models.ManyToManyField(Spare)
+
+
+class Rubric(models.Model):
+    name = models.CharField(
+        max_length=20,
+        db_index=True,
+        verbose_name="Название",
+
+    )
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        # выполняем какие-то действия(запись в логи и тд обычно)
+        if True:
+            super().save(*args, **kwargs)
+        # выполняем какие-то действия(запись в логи и тд обычно)
+
+    def delete(self, *args, **kwargs):
+        # выполняем какие-то действия(запись в логи и тд обычно)
+        if True:
+            super().delete(*args, **kwargs)
+        # выполняем какие-то действия(запись в логи и тд обычно)
+
+    def get_absolute_url(self):
+        #  return f'/bboard/{self.pk}/'
+        return f'/{self.pk}/'
+
+    class Meta:
+        verbose_name = 'Рубрика'
+        verbose_name_plural = 'Рубрики'
+        ordering = ['name']
+
+
+class Bb(models.Model):
+    rubric = models.ForeignKey(
+        'Rubric',
+        null=True,
+        on_delete=models.PROTECT,
+        verbose_name='Рубрика',
+    )
+
+    title = models.CharField(
+        max_length=50,
+        verbose_name="Товар",
+    )
+
+    content = models.TextField(
+        null=True,
+        blank=True,
+        verbose_name="Описание",
+    )
+
+    price = models.FloatField(
+        null=True,
+        blank=True,
+        verbose_name="Цена",
+    )
+
+    published = models.DateTimeField(
+        auto_now_add=True,
+        db_index=True,
+        verbose_name="Опубликовано",
+    )
+
+    def __str__(self):
+        return f'Объявление: {self.title}'
+
+    def title_and_price(self):
+        if self.price:
+            #return '%s (%.2f)' % (self.title, self.price)
+            return f'{self.title} ({self.price:.2f})'
+        return self.title
+
+    class Meta:
+        verbose_name = "Объявление"
+        verbose_name_plural = "Объявления"
+        ordering = ['-published', 'title']
+        db_table = 'bboard_bb'
